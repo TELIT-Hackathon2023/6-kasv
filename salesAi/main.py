@@ -1,11 +1,23 @@
 import PyPDF2
+import openai
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import shutil
+from dotenv import load_dotenv
 import os
+import aiofiles
+from openai import OpenAI
+import asyncio
+from pathlib import Path
 
+from openai import AsyncOpenAI
+
+load_dotenv()
 app = FastAPI()
+api_key = os.getenv("OPENAI_API_KEY")
+client = AsyncOpenAI(api_key=api_key)
+
 
 # CORS middleware configuration
 app.add_middleware(
@@ -15,6 +27,103 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.post("/gpt3-turbo")
+async def gpt3_turbo():
+    try:
+        chat_completion = await client.chat.completions.create(
+            messages=[{"role": "user", "content": "Say this is a test"}],
+            model="gpt-3.5-turbo",
+        )
+        return chat_completion.choices[0].message.content
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error in GPT-3.5 Turbo request: {str(e)}")
+
+
+def extract_text_from_pdf(pdf_file_path):
+    text = ""
+    with open(pdf_file_path, "rb") as pdf_file:
+        pdf_reader = PyPDF2.PdfReader(pdf_file)
+        for page in pdf_reader.pages:
+            text += page.extract_text()
+    return text
+
+
+def split_text_into_chunks(text, chunk_size=4000):
+    words = text.split()
+    chunks = []
+    current_chunk = ""
+    for word in words:
+        if len(current_chunk) + len(word) < chunk_size:
+            current_chunk += word + " "
+        else:
+            chunks.append(current_chunk)
+            current_chunk = word + " "
+    if current_chunk:
+        chunks.append(current_chunk)
+    return chunks
+
+
+async def process_text_async(text, chunk_number, total_chunks):
+    print(f"Processing chunk {chunk_number + 1} of {total_chunks}")
+    try:
+        if chunk_number < total_chunks - 1:
+            # Prostřední kusy textu
+            chat_completion = await client.chat.completions.create(
+                messages=[{"role": "user", "content": text}],
+                model="gpt-3.5-turbo",
+                stop=["\n\n"]
+            )
+        else:
+            # Poslední kus textu - vygenerovat souhrn
+            chat_completion = await client.chat.completions.create(
+                messages=[{"role": "user", "content": text + " Summarize the above RFP document."}],
+                model="gpt-3.5-turbo",
+                stop=["\n\n"]
+            )
+        return chat_completion.choices[0].message.content
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error in GPT-3 request: {str(e)}")
+
+
+async def process_text_chunks(chunks):
+    processed_chunks = []
+    total_chunks = len(chunks)
+    for i, chunk in enumerate(chunks):
+        processed_chunk = await process_text_async(chunk, i, total_chunks)
+        processed_chunks.append(processed_chunk)
+        progress_percentage = (i + 1) / total_chunks * 100
+        print(f"Completed {progress_percentage:.2f}%")
+    return "".join(processed_chunks)
+
+
+@app.post("/process-pdf")
+async def process_pdf(file: UploadFile = File(...)):
+    if not file.filename.endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="Invalid file type. Only PDF files are accepted.")
+
+    # Temporary directory for storing files
+    temp_dir = "./temp"
+    os.makedirs(temp_dir, exist_ok=True)
+
+    file_location = os.path.join(temp_dir, file.filename)
+
+    # Save PDF file
+    with open(file_location, "wb+") as file_object:
+        shutil.copyfileobj(file.file, file_object)
+
+    # Extract text from PDF
+    text = extract_text_from_pdf(file_location)
+    text_chunks = split_text_into_chunks(text)
+
+    # Process text chunks
+    processed_text = await process_text_chunks(text_chunks)
+
+    # Clean up temporary files
+    os.remove(file_location)
+
+    return {"processed_text": processed_text}
 
 
 def get_unique_filename(folder_path, filename):

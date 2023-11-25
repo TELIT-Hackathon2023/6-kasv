@@ -24,4 +24,6 @@ yarn-error.log*
 
 /salesAi/venv/*
 /salesAi/venv/
-/salesAi/_picahe_/
+/salesAi/__pycahe__/
+/salesAi/.env
+/salesAi/temp/

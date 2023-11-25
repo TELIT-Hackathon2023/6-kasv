@@ -7,9 +7,7 @@ const App = () => {
                 <Navigation />
                 <UploadDocuments />
                 <Results />
-
             </div>
-
     );
 }
 export default App

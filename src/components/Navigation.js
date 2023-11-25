@@ -8,7 +8,6 @@ function Navigation() {
                     <img src="/logo.png" className="h-10" alt="Logo" />
                 </div>
             </nav>
-
         </div>
     )
 }

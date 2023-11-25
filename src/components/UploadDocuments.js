@@ -25,19 +25,13 @@ const UploadDocument = () => {
 
     return (
         <div className="flex flex-col items-center justify-center bg-gray-50 h-screen">
-            <label
-                className="w-64 flex flex-col items-center px-4 py-6 bg-white text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer"
+            <label onClick={handleFileUpload}
+                className="w-64 flex flex-col items-center px-4 py-6 bg-white text-blue shadow-lg tracking-wide uppercase border border-blue cursor-pointer"
             >
                 <span className="text-base leading-normal">Select PDF</span>
                 <input type='file' className="hidden" onChange={handleFileChange} accept=".pdf" />
             </label>
             {selectedFile && <p className="mt-3 text-xl text-gray-600">Selected file: {selectedFile.name}</p>}
-            <button
-                onClick={handleFileUpload}
-                className="mt-3 p-2 bg-blue-500 text-white rounded"
-            >
-                Upload PDF
-            </button>
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import {Navigation, UploadDocuments, Results, Graph } from "./components";
+import {Navigation, UploadDocuments, Results, Graph, Score } from "./components";
 
 const App = () => {
     return (
@@ -8,6 +8,7 @@ const App = () => {
                 <UploadDocuments/>
                 <Results />
                 <Graph />
+                <Score />
             </div>
     );
 }

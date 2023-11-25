@@ -1,6 +1,25 @@
 import React from 'react'
 
-const Results = ({ results }) => {
+const fakeData = [
+    {
+        problemStatement: 'Potrebujeme vytvoriť novú webovú aplikáciu pre správu našich interných zdrojov.',
+        scopeOfWork: 'Vývoj plne funkčnej webovej aplikácie s autentifikáciou užívateľov, CRUD operáciami a pripojením na našu internú databázu.',
+        requiredTechnologyStack: ['React', 'Node.js', 'Express', 'MongoDB'],
+        pricingModel: 'T&M',
+        serviceLevelAgreements: '99.9% dostupnosť servera, mesačné aktualizácie a údržba.',
+        selectionCriteria: 'Skúsenosti s podobnými projekty, kvalita portfólia, cena a časový rámec.',
+        timelines: 'Potrebujeme, aby bol projekt dokončený do 6 mesiacov od dátumu podpisu zmluvy.',
+        contactDetails: {
+            name: 'John Doe',
+            address: '123 Main St, Anytown, USA',
+            phone: '555-555-5555',
+            email: 'johndoe@example.com'
+        },
+        penaltyClauses: 'Pokuta 1000 € za každý deň oneskorenia nad rámec dohodnutého termínu.',
+        requiredOfferType: 'Záväzná'
+    },
+];
+const Results = ({ results = fakeData }) => {
     if (!results) {
         return <div role="status">
             <svg aria-hidden="true" className="w-10 h-10 text-gray-200 animate-spin fill-tmagenta" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -10,32 +29,46 @@ const Results = ({ results }) => {
             <span className="sr-only">Loading...</span>
         </div>
     }
-    return (
-        <div className="flex justify-center border-2 max-w-3xl h-96 mx-auto">
-            {results.map((result, index) => (
-                <div className="flex flex-col justify-between p-20 text-center"
-                    key={index}>
-                    <h2 className="text-tmagenta">{result.title}</h2>
-                    <p>{result.summary}</p>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th className="text-tmagenta">Kritérium</th>
-                            <th className="text-tmagenta">Skóre</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {result.criteria.map((criterion, i) => (
-                            <tr key={i}>
-                                <td>{criterion.name}</td>
-                                <td>{criterion.score}</td>
+        return (
+            <div className="flex justify-center border-2 max-w-auto h-96 mx-auto">
+                {fakeData.map((result, index) => (
+                    <div className="flex flex-col justify-between p-20 text-center"
+                         key={index}>
+                        <h2 className="text-tmagenta">{result.title}</h2>
+                        <p>{result.summary}</p>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th className="text-tmagenta">PROBLEM STATEMENT</th>
+                                <th className="text-tmagenta">SCOPE OF THE WORK</th>
+                                <th className="text-tmagenta">REQ TECHNOLOGY STACK</th>
+                                <th className="text-tmagenta">PRICING MODEL</th>
+                                <th className="text-tmagenta">SERVICE LEVEL AGREEMENTS (SLAS)</th>
+                                <th className="text-tmagenta">SELECTION CRITERIA</th>
+                                <th className="text-tmagenta">TIMELINES</th>
+                                <th className="text-tmagenta">CONTACT DETAILS</th>
+                                <th className="text-tmagenta">PENALTY CLAUSES</th>
+                                <th className="text-tmagenta">REQUIRED OFFER TYPE (BINDING OR NON-BINDING)</th>
                             </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                </div>
-            ))}
-        </div>
-    );
-};
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>{result.problemStatement}</td>
+                                <td>{result.scopeOfWork}</td>
+                                <td>{result.requiredTechnologyStack.join(', ')}</td>
+                                <td>{result.pricingModel}</td>
+                                <td>{result.serviceLevelAgreements}</td>
+                                <td>{result.selectionCriteria}</td>
+                                <td>{result.timelines}</td>
+                                <td>{result.contactDetails.name}, {result.contactDetails.address}, {result.contactDetails.phone}, {result.contactDetails.email}</td>
+                                <td>{result.penaltyClauses}</td>
+                                <td>{result.requiredOfferType}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                ))}
+            </div>
+        );
+    };
 export default Results

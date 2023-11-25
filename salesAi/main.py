@@ -4,6 +4,7 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import shutil
+from dotenv import load_dotenv
 import os
 import aiofiles
 from openai import OpenAI
@@ -12,10 +13,11 @@ from pathlib import Path
 
 from openai import AsyncOpenAI
 
+load_dotenv()
 app = FastAPI()
-client = AsyncOpenAI(
-    api_key="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",
-)
+api_key = os.getenv("OPENAI_API_KEY")
+client = AsyncOpenAI(api_key=api_key)
+
 
 # CORS middleware configuration
 app.add_middleware(
@@ -63,12 +65,23 @@ def split_text_into_chunks(text, chunk_size=4000):
     return chunks
 
 
-async def process_text_async(text):
+async def process_text_async(text, chunk_number, total_chunks):
+    print(f"Processing chunk {chunk_number + 1} of {total_chunks}")
     try:
-        chat_completion = await client.chat.completions.create(
-            messages=[{"role": "user", "content": text}],
-            model="gpt-3.5-turbo",
-        )
+        if chunk_number < total_chunks - 1:
+            # Prostřední kusy textu
+            chat_completion = await client.chat.completions.create(
+                messages=[{"role": "user", "content": text}],
+                model="gpt-3.5-turbo",
+                stop=["\n\n"]
+            )
+        else:
+            # Poslední kus textu - vygenerovat souhrn
+            chat_completion = await client.chat.completions.create(
+                messages=[{"role": "user", "content": text + " Summarize the above RFP document."}],
+                model="gpt-3.5-turbo",
+                stop=["\n\n"]
+            )
         return chat_completion.choices[0].message.content
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in GPT-3 request: {str(e)}")
@@ -78,10 +91,10 @@ async def process_text_chunks(chunks):
     processed_chunks = []
     total_chunks = len(chunks)
     for i, chunk in enumerate(chunks):
-        processed_chunk = await process_text_async(chunk)
+        processed_chunk = await process_text_async(chunk, i, total_chunks)
         processed_chunks.append(processed_chunk)
         progress_percentage = (i + 1) / total_chunks * 100
-        print(f"Zpracováno {progress_percentage:.2f}%")
+        print(f"Completed {progress_percentage:.2f}%")
     return "".join(processed_chunks)
 
 

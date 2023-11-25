@@ -9,10 +9,16 @@ const UploadDocument = () => {
   };
 
   return (
-    <div>
-      <input type="file" onChange={handleFileChange} />
-      {selectedFile && <p>Selected file: {selectedFile.name}</p>}
+    <div className="flex flex-col items-center justify-center bg-gray-50 h-screen">
+      <label 
+        className="w-64 flex flex-col items-center px-4 py-6 bg-white text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer"
+      >
+        <span className="mt-2 text-base leading-normal">Select a file</span>
+        <input type='file' className="hidden" onChange={handleFileChange} />
+      </label>
+      {selectedFile && <p className="mt-3 text-xl text-gray-600">Selected file: {selectedFile.name}</p>}
     </div>
   );
 };
+
 export default UploadDocument;

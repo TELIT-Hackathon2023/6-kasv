@@ -24,7 +24,7 @@ const UploadDocument = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center bg-gray-50 h-screen">
+        <div className="flex flex-col items-center justify-center bg-gray-50  ">
             <button className="bg-tmagenta" onClick={handleFileUpload}>
                 <label
                 className="w-64 flex flex-col items-center px-4 py-6 bg-tmagenta text-white tracking-widest uppercase cursor-pointer"

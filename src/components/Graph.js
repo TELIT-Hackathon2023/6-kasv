@@ -2,25 +2,32 @@ import React from 'react'
 import { VictoryBar, VictoryChart, VictoryAxis, VictoryTheme } from 'victory'
 
 const data = [
-  {quarter: 1, earnings: 13000},
-  {quarter: 2, earnings: 16500},
-  {quarter: 3, earnings: 14250},
-  {quarter: 4, earnings: 19000}
+  {category: "Problem statement", points: 3},
+  {category: "State of the work", points: 6},
+  {category: "Required technology stack", points: 2},
+  {category: "Pricing model", points: 8},
+  {category: "SLAs", points: 7},
+  {category: "Selection criteria", points: 5},
+  {category: "Timelines", points: 4},
+  {category: "Contact details", points: 9},
+  {category: "Penalty clauses", points: 1},
+  {category: "Required offer type (binding or non-binding)", points: 10}
 ];
 
 function Graph() {
   return (
-  <div className="w-1/4">
+  <div className="w-full h-1/2 screen">
+    <h2>RFP Match</h2>
     <VictoryChart domainPadding={20} theme={VictoryTheme.material}>
       <VictoryAxis
-        tickValues={[1, 2, 3, 4]}
-        tickFormat={["Quarter 1", "Quarter 2", "Quarter 3", "Quarter 4"]}
+        tickValues={data.map((_, i) => i)}
+        tickFormat={data.map((d) => d.category)}
       />
       <VictoryAxis
         dependentAxis
-        tickFormat={(x) => (`$${x / 1000}k`)}
+        tickFormat={(x) => (`${x} pts`)}
       />
-      <VictoryBar data={data} x="quarter" y="earnings" />
+      <VictoryBar data={data} x="category" y="points" />
     </VictoryChart>
   </div>
 

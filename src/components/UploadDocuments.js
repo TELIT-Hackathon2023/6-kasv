@@ -38,5 +38,4 @@ const UploadDocument = () => {
         </div>
     );
 };
-
 export default UploadDocument;

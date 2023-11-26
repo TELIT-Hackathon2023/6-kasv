@@ -5,7 +5,7 @@ function Navigation() {
         <div>
             <nav className="bg-tmagenta">
                 <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-6">
-                    <img src="/logo.png" className="h-10" alt="Logo" />
+                    <a href="#"><img src="/logo.png" className="h-10" alt="Logo" /></a>
                 </div>
             </nav>
         </div>

@@ -1,6 +1,6 @@
 import Navigation from "./Navigation";
-import UploadDocuments from "./UploadDocuments";
+import ListOfPdfs from "./ListOfPdfs";
 import Results from "./Results";
 import Graph from "./Graph";
 
-export { Navigation, UploadDocuments, Results, Graph, };
+export { Navigation, ListOfPdfs, Results, Graph, };

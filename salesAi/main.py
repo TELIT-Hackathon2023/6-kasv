@@ -16,6 +16,10 @@ app = FastAPI()
 api_key = os.getenv("OPENAI_API_KEY")
 client = AsyncOpenAI(api_key=api_key)
 
+origins = [
+    "http://localhost:3000",  # React app's origin
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -158,20 +162,21 @@ async def say_hello(name: str):
     return {"message": f"Hello {name}"}
 
 
-@app.post("/compare-pdfs")
+@app.post("/new-pdf")
 async def compare_pdfs(file: UploadFile = File(...)):
     os.makedirs('pdf', exist_ok=True)
-
     file_path = os.path.join('pdf', file.filename)
     file_path = generate_unique_file_path(file_path)
 
     with open(file_path, "wb") as f:
-        f.write(file.file.read())
+        f.write(await file.read())
 
     try:
         similarity = compare_pdf_files(file_path, './pdf/dtits/scraped_data.pdf')
-        return {"Similarity": f"{similarity * 100:.2f}%"}
+        similarity = (round(float(similarity), 2) * 10) if similarity is not None else None
+        return {"filename": file.filename, "similarity": similarity}
     except Exception as e:
+        print(f"Error: {e}")
         return {"error": str(e)}
 
 

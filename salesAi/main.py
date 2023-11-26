@@ -1,25 +1,19 @@
 import PyPDF2
-import openai
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import shutil
 from dotenv import load_dotenv
 import os
-import aiofiles
-from openai import OpenAI
-import asyncio
-from pathlib import Path
-
 from openai import AsyncOpenAI
+import gensim
+from gensim.models.doc2vec import TaggedDocument
 
 load_dotenv()
 app = FastAPI()
 api_key = os.getenv("OPENAI_API_KEY")
 client = AsyncOpenAI(api_key=api_key)
 
-
-# CORS middleware configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -46,7 +40,7 @@ def extract_text_from_pdf(pdf_file_path):
     with open(pdf_file_path, "rb") as pdf_file:
         pdf_reader = PyPDF2.PdfReader(pdf_file)
         for page in pdf_reader.pages:
-            text += page.extract_text()
+            text += page.extract_text() + "\n\n"
     return text
 
 
@@ -55,47 +49,28 @@ def split_text_into_chunks(text, chunk_size=4000):
     chunks = []
     current_chunk = ""
     for word in words:
-        if len(current_chunk) + len(word) < chunk_size:
+        if len(current_chunk) + len(word) + 1 < chunk_size:
             current_chunk += word + " "
         else:
-            chunks.append(current_chunk)
+            chunks.append(current_chunk.strip())
             current_chunk = word + " "
     if current_chunk:
-        chunks.append(current_chunk)
+        chunks.append(current_chunk.strip())
     return chunks
 
 
-async def process_text_async(text, chunk_number, total_chunks):
-    print(f"Processing chunk {chunk_number + 1} of {total_chunks}")
+async def process_text_chunk(chunk, index, last_index):
+    summary_prompt = f"Summarize the following text:\n\n{chunk}"
+
     try:
-        if chunk_number < total_chunks - 1:
-            # Prostřední kusy textu
-            chat_completion = await client.chat.completions.create(
-                messages=[{"role": "user", "content": text}],
-                model="gpt-3.5-turbo",
-                stop=["\n\n"]
-            )
-        else:
-            # Poslední kus textu - vygenerovat souhrn
-            chat_completion = await client.chat.completions.create(
-                messages=[{"role": "user", "content": text + " Summarize the above RFP document."}],
-                model="gpt-3.5-turbo",
-                stop=["\n\n"]
-            )
+        chat_completion = await client.chat.completions.create(
+            messages=[{"role": "user", "content": summary_prompt}],
+            model="gpt-3.5-turbo",
+            stop=["\n\n"]
+        )
         return chat_completion.choices[0].message.content
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error in GPT-3 request: {str(e)}")
-
-
-async def process_text_chunks(chunks):
-    processed_chunks = []
-    total_chunks = len(chunks)
-    for i, chunk in enumerate(chunks):
-        processed_chunk = await process_text_async(chunk, i, total_chunks)
-        processed_chunks.append(processed_chunk)
-        progress_percentage = (i + 1) / total_chunks * 100
-        print(f"Completed {progress_percentage:.2f}%")
-    return "".join(processed_chunks)
+        raise HTTPException(status_code=500, detail=f"Error in GPT-3.5 Turbo request: {str(e)}")
 
 
 @app.post("/process-pdf")
@@ -103,27 +78,23 @@ async def process_pdf(file: UploadFile = File(...)):
     if not file.filename.endswith('.pdf'):
         raise HTTPException(status_code=400, detail="Invalid file type. Only PDF files are accepted.")
 
-    # Temporary directory for storing files
     temp_dir = "./temp"
     os.makedirs(temp_dir, exist_ok=True)
-
     file_location = os.path.join(temp_dir, file.filename)
 
-    # Save PDF file
     with open(file_location, "wb+") as file_object:
         shutil.copyfileobj(file.file, file_object)
 
-    # Extract text from PDF
     text = extract_text_from_pdf(file_location)
-    text_chunks = split_text_into_chunks(text)
+    chunks = split_text_into_chunks(text)
 
-    # Process text chunks
-    processed_text = await process_text_chunks(text_chunks)
+    response = ""
 
-    # Clean up temporary files
-    os.remove(file_location)
+    for index, chunk in enumerate(chunks):
+        summary_chunk = await process_text_chunk(chunk, index, len(chunks) - 1)
+        response += summary_chunk + "\n\n"
 
-    return {"processed_text": processed_text}
+    return response
 
 
 def get_unique_filename(folder_path, filename):
@@ -183,3 +154,51 @@ async def root():
 @app.get("/hello/{name}")
 async def say_hello(name: str):
     return {"message": f"Hello {name}"}
+
+
+@app.post("/compare-pdfs")
+async def compare_pdfs(file: UploadFile = File(...)):
+    os.makedirs('pdf', exist_ok=True)
+
+    file_path = os.path.join('pdf', file.filename)
+    file_path = generate_unique_file_path(file_path)
+
+    with open(file_path, "wb") as f:
+        f.write(file.file.read())
+
+    try:
+        similarity = compare_pdf_files(file_path, './pdf/dtits/scraped_data.pdf')
+        return {"Similarity": f"{similarity * 100:.2f}%"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def generate_unique_file_path(path):
+    directory, filename = os.path.split(path)
+    base_filename, extension = os.path.splitext(filename)
+
+    counter = 1
+    while os.path.exists(path):
+        new_filename = f"{base_filename}_{counter}{extension}"
+        path = os.path.join(directory, new_filename)
+        counter += 1
+    return path
+
+
+def compare_pdf_files(file_path1, file_path2):
+    pdf1 = PyPDF2.PdfReader(file_path1)
+    pdf2 = PyPDF2.PdfReader(file_path2)
+
+    documents = []
+    for pdf in [pdf1, pdf2]:
+        text = ''
+        for page in pdf.pages:
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text
+        documents.append(TaggedDocument(gensim.utils.simple_preprocess(text), [pdf]))
+
+    model = gensim.models.Doc2Vec(documents, vector_size=50, min_count=2, epochs=40)
+    similarity = model.dv.similarity(0, 1)
+    return similarity
+

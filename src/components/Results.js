@@ -30,9 +30,9 @@ const Results = ({ results = fakeData }) => {
         </div>
     }
         return (
-            <div className="py-10 mx-auto fixed w-full bottom-0">
+            <div className="py-10 mx-auto w-full">
                 {fakeData.map((result, index) => (
-                    <div className="flex flex-col px-16 text-cente"
+                    <div className="flex flex-col px-16 text-center"
                          key={index}>
                         <h2 className="text-tmagenta">{result.title}</h2>
                         <p>{result.summary}</p>

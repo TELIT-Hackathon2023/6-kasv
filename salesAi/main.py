@@ -1,4 +1,5 @@
 import PyPDF2
+from aiohttp.web_fileresponse import FileResponse
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,6 +9,7 @@ import os
 from openai import AsyncOpenAI
 import gensim
 from gensim.models.doc2vec import TaggedDocument
+import webbrowser
 
 load_dotenv()
 app = FastAPI()
@@ -210,8 +212,12 @@ async def get_pdfs():
         if filename.endswith('.pdf'):
             print(filename)
             similarity = compare_pdf_files('./pdf/dtits/scraped_data.pdf', f'./pdf/{filename}')
-            similarity = round(float(similarity), 2) if similarity is not None else None
+            similarity = (round(float(similarity), 2)*10) if similarity is not None else None
         pdfs.append({'filename': filename, 'similarity': similarity})
     return pdfs
 
 
+@app.get("/pdfs/{filename}")
+async def get_pdf(filename: str):
+    path = os.path.join('./pdf', filename)
+    webbrowser.open_new(path)

@@ -202,3 +202,16 @@ def compare_pdf_files(file_path1, file_path2):
     similarity = model.dv.similarity(0, 1)
     return similarity
 
+
+@app.get("/pdfs")
+async def get_pdfs():
+    pdfs = []
+    for filename in os.listdir('./pdf'):
+        if filename.endswith('.pdf'):
+            print(filename)
+            similarity = compare_pdf_files('./pdf/dtits/scraped_data.pdf', f'./pdf/{filename}')
+            similarity = round(float(similarity), 2) if similarity is not None else None
+        pdfs.append({'filename': filename, 'similarity': similarity})
+    return pdfs
+
+

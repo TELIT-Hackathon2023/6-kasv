@@ -5,7 +5,7 @@ const ListOfPdfs = () => {
 
     useEffect(() => {
         // Fetch the list of PDFs from your backend
-        fetch('http://localhost:8000/pdf-list') // Replace with your actual API endpoint
+        fetch('http://localhost:8000/pdfs') // Replace with your actual API endpoint
             .then(response => response.json())
             .then(data => setPdfs(data))
             .catch(error => console.error('Error:', error));

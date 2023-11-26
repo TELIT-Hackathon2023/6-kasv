@@ -6,9 +6,9 @@ const App = () => {
             <div className="App">
                 <Navigation />
                 <UploadDocuments/>
+                <Score />
                 <Graph />
                 <Results />
-                <Score />
             </div>
     );
 }

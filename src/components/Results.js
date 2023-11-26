@@ -30,29 +30,29 @@ const Results = ({ results = fakeData }) => {
         </div>
     }
         return (
-            <div className="flex justify-center py-10 mx-auto">
+            <div className="py-10 mx-auto fixed w-full bottom-0">
                 {fakeData.map((result, index) => (
-                    <div className="flex flex-col justify-between px-16 text-center"
+                    <div className="flex flex-col px-16 text-cente"
                          key={index}>
                         <h2 className="text-tmagenta">{result.title}</h2>
                         <p>{result.summary}</p>
-                        <table>
+                        <table className="table-fixed w-full">
                             <thead>
-                            <tr>
-                                <th className="text-tmagenta">PROBLEM STATEMENT</th>
-                                <th className="text-tmagenta">SCOPE OF THE WORK</th>
-                                <th className="text-tmagenta">REQ TECHNOLOGY STACK</th>
-                                <th className="text-tmagenta">PRICING MODEL</th>
-                                <th className="text-tmagenta">SERVICE LEVEL AGREEMENTS (SLAS)</th>
-                                <th className="text-tmagenta">SELECTION CRITERIA</th>
-                                <th className="text-tmagenta">TIMELINES</th>
-                                <th className="text-tmagenta">CONTACT DETAILS</th>
-                                <th className="text-tmagenta">PENALTY CLAUSES</th>
-                                <th className="text-tmagenta">REQUIRED OFFER TYPE (BINDING OR NON-BINDING)</th>
+                            <tr className="relative align-top">
+                                <th className="text-tmagenta">1<br/>PROBLEM STATEMENT</th>
+                                <th className="text-tmagenta">2<br/>SCOPE OF THE WORK</th>
+                                <th className="text-tmagenta">3<br/>REQ TECHNOLOGY STACK</th>
+                                <th className="text-tmagenta">4<br/>PRICING MODEL</th>
+                                <th className="text-tmagenta">5<br/>SERVICE LEVEL AGREEMENTS (SLAS)</th>
+                                <th className="text-tmagenta">6<br/>SELECTION CRITERIA</th>
+                                <th className="text-tmagenta">7<br/>TIMELINES</th>
+                                <th className="text-tmagenta">8<br/>CONTACT DETAILS</th>
+                                <th className="text-tmagenta">9<br/>PENALTY CLAUSES</th>
+                                <th className="text-tmagenta">10<br/>REQUIRED OFFER TYPE (BINDING OR NON-BINDING)</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
+                            <tr className="relative align-bottom text-center">
                                 <td>{result.problemStatement}</td>
                                 <td>{result.scopeOfWork}</td>
                                 <td>{result.requiredTechnologyStack.join(', ')}</td>

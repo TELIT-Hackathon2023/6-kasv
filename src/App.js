@@ -5,8 +5,10 @@ const App = () => {
 
             <div className="App">
                 <Navigation />
-                <UploadDocuments/>
-                <Graph />
+                <div className="flex columns-2 justify-between px-16 py-10">
+                    <UploadDocuments/>
+                    <Graph />
+                </div>
                 <Results />
             </div>
     );

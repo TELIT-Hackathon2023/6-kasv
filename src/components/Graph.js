@@ -23,7 +23,7 @@ const Graph = () => {
     const average = calculateAverage(data);
 
     return (
-        <div className="flex flex-col items-center max-w-3xl mx-auto border-2 p-4 bg-white rounded-md shadow-md">
+        <div className="flex flex-col items-center p-4 bg-white rounded-md shadow-sm">
             <h2 className="text-2xl font-bold">RFP Match</h2>
             <div className="flex items-center justify-center">
                 <h2 className="w-64 flex flex-col items-center px-4 py-6 text-tmagenta bg-white">Average points: {average}</h2>

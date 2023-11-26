@@ -6,8 +6,8 @@ const App = () => {
             <div className="App">
                 <Navigation />
                 <UploadDocuments/>
-                <Results />
                 <Graph />
+                <Results />
                 <Score />
             </div>
     );

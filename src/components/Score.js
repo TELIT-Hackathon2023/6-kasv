@@ -18,8 +18,8 @@ function Score() {
   const average = sum / data.length;
 
   return (
-    <div>
-      <h2 className="text-tmagenta">Average point: {average}</h2>                  
+    <div className="flex flex-col items-center justify-center bg-gray-50">
+      <h2 className="w-64 flex flex-col items-center px-4 py-6 text-tmagenta bg-white border">Average points: {average}</h2>
     </div>
   )
 }
